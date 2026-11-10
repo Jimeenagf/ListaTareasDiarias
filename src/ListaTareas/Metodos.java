@@ -87,8 +87,9 @@ public class Metodos extends JFrame {
         // Zona para añadir tareas
         JButton botonAnadir = new JButton("Añadir tarea");
 
-        JButton botonEliminar =
-                new JButton("Eliminar tareas terminadas");
+        JButton botonEliminar = new JButton("Eliminar tareas terminadas");
+        
+        JButton botonEditar = new JButton("Editar tarea");
 
         JPanel entrada = new JPanel(new FlowLayout());
 
@@ -99,13 +100,24 @@ public class Metodos extends JFrame {
         JPanel inferior = new JPanel(new BorderLayout(5, 5));
 
         inferior.setOpaque(false);
+
         inferior.add(entrada, BorderLayout.NORTH);
         inferior.add(etiquetaProgreso, BorderLayout.CENTER);
-        inferior.add(botonEliminar, BorderLayout.SOUTH);
+
+        // Panel para los botones inferiores
+        JPanel panelBotones = new JPanel(new FlowLayout());
+
+        panelBotones.setOpaque(false);
+
+        panelBotones.add(botonEditar);
+        panelBotones.add(botonEliminar);
+
+        inferior.add(panelBotones, BorderLayout.SOUTH);
 
         principal.add(inferior, BorderLayout.SOUTH);
 
         setContentPane(principal);
+       
 
         // Eventos de los botones
         botonAnadir.addActionListener(e -> anadirTarea());
@@ -113,14 +125,12 @@ public class Metodos extends JFrame {
         campoTarea.addActionListener(e -> anadirTarea());
 
         botonEliminar.addActionListener(e -> {
-
             tareas.removeIf(t -> t.completada);
-
             guardarTareas();
-
             actualizarInterfaz();
-
         });
+        
+        botonEditar.addActionListener(e -> editarTarea());
 
         actualizarInterfaz();
     }
@@ -143,6 +153,79 @@ public class Metodos extends JFrame {
 
         campoTarea.setText("");
 
+        guardarTareas();
+
+        actualizarInterfaz();
+    }
+    
+ // Editar una tarea existente
+    private void editarTarea() {
+
+        // Comprobar si hay tareas
+        if (tareas.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No hay tareas para editar.");
+
+            return;
+        }
+
+        // Crear las opciones con las tareas existentes
+        String[] opciones = new String[tareas.size()];
+
+        for (int i = 0; i < tareas.size(); i++) {
+
+            opciones[i] = (i + 1) + ". " + tareas.get(i).nombre;
+        }
+
+        // Crear una lista desplegable para seleccionar la tarea
+        JComboBox<String> selector = new JComboBox<>(opciones);
+
+        int resultado = JOptionPane.showConfirmDialog(
+                this,
+                selector,
+                "Seleccionar tarea para editar",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        // Si se pulsa Cancelar, no hacer nada
+        if (resultado != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        // Obtener la tarea seleccionada
+        int indice = selector.getSelectedIndex();
+
+        Tarea tareaSeleccionada = tareas.get(indice);
+
+        // Pedir el nuevo nombre
+        String nuevoNombre = JOptionPane.showInputDialog(
+                this,
+                "Introduce el nuevo nombre de la tarea:",
+                tareaSeleccionada.nombre);
+
+        // Si se pulsa Cancelar, no hacer nada
+        if (nuevoNombre == null) {
+            return;
+        }
+
+        nuevoNombre = nuevoNombre.trim();
+
+        // Comprobar que el nombre no está vacío
+        if (nuevoNombre.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "El nombre de la tarea no puede estar vacío.");
+
+            return;
+        }
+
+        // Modificar la tarea
+        tareaSeleccionada.nombre = nuevoNombre;
+
+        // Guardar y actualizar
         guardarTareas();
 
         actualizarInterfaz();
